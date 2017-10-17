@@ -6,40 +6,31 @@ by Are Granhaug (are@granhaug.no)
 
 TODO:
 X   Clean up the font system to remove repetitions
+X   Support negative numbers
 X   BASE-2,8,16
 V   Add each number to a list or tuple
 X   Enable handling of multi-operator problems
 X   Use operator library
+X   Enable data entry using keyboard
 '''
 
 #Imports GUI packages
 import tkinter as tk
 from tkinter import font
 import operator
-
-#Stores path in variable to later import icon file
 import os
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
 #Main GUI window called root
 root = tk.Tk()
 root.title("Calculator")
+dir_path = os.path.dirname(os.path.realpath(__file__))
 root.iconbitmap(dir_path + '\icon.ico')
-
-#print("Path: " + dir_path)
 
 helv16 = font.Font(family='Helvetica', size=16, weight="bold")
 
 #Make list global to allow it to be accessed by functions. ex numberList = [5, '+', '3', '-', '6']
 global numberList
 numberList=[]
-
-operator_dict = {
-    '+': operator.add,
-    '-': operator.sub,
-    '*': operator.mul,
-    '/': operator.truediv
-}
 
 #=================FUNCTIONS=================
 
@@ -61,33 +52,36 @@ def multiplication():
 def division():
     storeValue(int(display.cget('text')), "/")
 
-#[5 + 4 + 2 - 7 / 8]
-#[Value, operator, value, operator, value]
-#Odd: Value
-#Even: Operator
-
-#Fancy algorithm that goes through valueList and packs it down and down
-#according to PEMDAS until only final answer remains
-
-def execute(i,o,j):
-    if o = '+':
+#BUG j is str type!
+def reduceList(i,o,j):
+    print(i,o,j)
+    if o == '+':
         newValue = operator.add(i,j)
-    elif o = '-':
+    elif o == '-':
         newValue = operator.sub(i,j)
-    elif o = '*':
+    elif o == '*':
         newValue = operator.mul(i,j)
-    elif o = '/':
+    elif o == '/':
         newValue = operator.truediv(i,j)
+    print(newValue)
     return newValue
 
 def equals():
     numberList.append(display.cget('text'))
     print(numberList)
-    for i in range(len(numberList)):
-        newValue = execute(i,i+1,i+2)
-        del numberList(i:i+2)
-        numberList
 
+    numberList[0] = reduceList(numberList[0], numberList[1], numberList[2])
+    del numberList[2]
+    print(numberList)
+
+
+    #Subtract 2 from value range
+    '''
+    for i in range(len(numberList)):
+        numberList[0] = reduceList(i,i+1,i+2)
+        del numberList[i+1:i+2]
+        numberList
+    '''
 
 def num1():
     display.config(text=display.cget('text') + '1')
@@ -119,13 +113,33 @@ def num9():
 def num0():
     display.config(text=display.cget('text') + '0')
 
-#Resets list and display
+#Toggles sign of displayed value (pos/neg)
+#TODO: use operator.neg instead
+
+def sign():
+    number = int(display.cget('text'))
+    operator.neg(number)
+    display.config(text=number)
+    print(type(number))
+    print(number)
+
+'''
+def sign():
+    str = display.cget('text')
+    if str[0] == '-':
+        str = str[1:]
+        display.config(text=str)
+    else:
+        display.config(text='-' + display.cget('text'))
+'''
+
+
+#Deletes list content and clears display
 def ce():
     del numberList[:]
     display.config(text='')
 
 #=================GUI ELEMENT DESIGN=================
-
 display = tk.Label(root, text='', width=40, background="lightgray", font=("25"), anchor='e')
 butPlu = tk.Button(root, borderwidth="0", font=helv16, relief="groove",
                    text="+", height="3", width="5", padx="5", pady="5", border="5", command=addition)
@@ -157,8 +171,8 @@ but0 = tk.Button(root, borderwidth="0", font=helv16, relief="groove",
                    text="0", height="3", width="5", padx="5", pady="5", border="5", command=num0)
 butEqu = tk.Button(root, borderwidth="0", font=helv16, relief="groove",
                    text="=", height="3", width="5", padx="5", pady="5", border="5", command=equals)
-butCom = tk.Button(root, borderwidth="0", font=helv16, relief="groove",
-                   text=",", height="3", width="5", padx="5", pady="5", border="5", command=division)
+butSig = tk.Button(root, borderwidth="0", font=helv16, relief="groove",
+                   text="+/-", height="3", width="5", padx="5", pady="5", border="5", command=sign)
 butCE = tk.Button(root, borderwidth="0", font=helv16, relief="groove",
                    text="CE", height="3", width="5", padx="5", pady="5", border="5", command=ce)
 
@@ -169,7 +183,7 @@ butMin.grid(row=4,column=4)
 butMul.grid(row=3,column=4)
 butDiv.grid(row=2,column=4)
 butEqu.grid(row=6,column=4)
-butCom.grid(row=6,column=3)
+butSig.grid(row=6,column=3)
 butCE.grid(row=6,column=1)
 
 but1.grid(row=5,column=1)
